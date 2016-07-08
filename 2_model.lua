@@ -52,15 +52,17 @@ local function createModel()
     -- model
     local model = nn.Sequential()
     model:add(Convolution(1, 16, 3, 3, 1, 1, 1, 1))
-    model:add(SBatchNorm(16))
     model:add(ReLU(true))
     model:add(stackResidualBlock(stackDepth, 16, 1))    --64
     model:add(stackResidualBlock(stackDepth, 32, 2))    --32
     model:add(stackResidualBlock(stackDepth, 64, 2))    --16
     model:add(stackResidualBlock(stackDepth, 128, 2))   --8
-    model:add(Avg(8, 8, 1, 1))
-    model:add(nn.View(128):setNumInputDims(3))
-    model:add(nn.Linear(128, 10))
+    model:add(stackResidualBlock(stackDepth, 128, 2))   --4
+    model:add(stackResidualBlock(stackDepth, 128, 2))   --2
+    model:add(nn.View(128*4):setNumInputDims(3))
+    model:add(nn.Linear(128*4, 64))
+    model:add(ReLU(true))
+    model:add(nn.Linear(64, 10))
     model:add(nn.LogSoftMax())
 
     -- 初始化参数

@@ -13,7 +13,6 @@ function train()
         local inputs, targets = load_input_target_train()
 
         image.save('1.png', inputs[1])
-        print(targets[1])
 
         if global_use_cuda then
             inputs = inputs:cuda()
@@ -32,11 +31,6 @@ function train()
             local error = criterion:forward(outputs, targets)
             local grad = criterion:backward(outputs, targets)
             model:backward(inputs, grad)
-
-            print(error)
-            print(outputs[1])
-            print(grad[1])
-            os.exit()
 
             -- normalize
             local batchSize = inputs:size(1)

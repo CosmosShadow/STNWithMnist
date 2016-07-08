@@ -34,8 +34,8 @@ local function createModel()
 
         return nn.Sequential()
             :add(nn.ConcatTable()
-            :add(s)
-            :add(shortcut(nInputPlane, nOutputPlane, stride)))
+                :add(s)
+                :add(shortcut(nInputPlane, nOutputPlane, stride)))
             :add(nn.CAddTable(true))
             :add(ReLU(true))
     end
@@ -53,21 +53,59 @@ local function createModel()
     stackDepth = 1
     nPreviousOutputPlane = 16
 
+    -- 定位
+    local loc_net = nn.Sequential()
+    loc_net:add(Convolution(1, 16, 3, 3, 1, 1, 1, 1))
+    loc_net:add(ReLU(true))
+    loc_net:add(stackResidualBlock(stackDepth, 16, 1))    --64
+    loc_net:add(stackResidualBlock(stackDepth, 32, 2))    --32
+    loc_net:add(stackResidualBlock(stackDepth, 64, 2))    --16
+    loc_net:add(stackResidualBlock(stackDepth, 128, 2))   --8
+    loc_net:add(stackResidualBlock(stackDepth, 128, 2))   --4
+    loc_net:add(stackResidualBlock(stackDepth, 128, 2))   --2
+    loc_net:add(nn.View(128*4):setNumInputDims(3))
+    loc_net:add(nn.Linear(128*4, 64))
+    loc_net:add(ReLU(true))
+    loc_net:add(nn.Linear(64, 6))
+
+    -- 空间变换网络
+    local ct = nn.ConcatTable()
+    local branch1 = nn.Sequential()
+    branch1:add(nn.Transpose({3,4},{2,4}))
+    local branch2 = nn.Sequential()
+    branch2:add(loc_net)
+    branch2:add(nn.AffineTransformMatrixGenerator(false, false, false))
+    branch2:add(nn.AffineGridGeneratorBHWD(64, 64))
+    ct:add(branch1)
+    ct:add(branch2)
+    local st = nn.Sequential()
+    st:add(ct)
+    st:add(nn.BilinearSamplerBHWD())
+    st:add(nn.Transpose({2,4},{3,4}))
+
+    -- parameter
+    stackDepth = 1
+    nPreviousOutputPlane = 16
+
     -- model
+    local classifier = nn.Sequential()
+    classifier:add(Convolution(1, 16, 3, 3, 1, 1, 1, 1))
+    classifier:add(ReLU(true))
+    classifier:add(stackResidualBlock(stackDepth, 16, 1))    --64
+    classifier:add(stackResidualBlock(stackDepth, 32, 2))    --32
+    classifier:add(stackResidualBlock(stackDepth, 64, 2))    --16
+    classifier:add(stackResidualBlock(stackDepth, 128, 2))   --8
+    classifier:add(stackResidualBlock(stackDepth, 128, 2))   --4
+    classifier:add(stackResidualBlock(stackDepth, 128, 2))   --2
+    classifier:add(nn.View(128*4):setNumInputDims(3))
+    classifier:add(nn.Linear(128*4, 64))
+    classifier:add(ReLU(true))
+    classifier:add(nn.Linear(64, 10))
+    classifier:add(nn.LogSoftMax())
+
     local model = nn.Sequential()
-    model:add(Convolution(1, 16, 3, 3, 1, 1, 1, 1))
-    model:add(ReLU(true))
-    model:add(stackResidualBlock(stackDepth, 16, 1))    --64
-    model:add(stackResidualBlock(stackDepth, 32, 2))    --32
-    model:add(stackResidualBlock(stackDepth, 64, 2))    --16
-    model:add(stackResidualBlock(stackDepth, 128, 2))   --8
-    model:add(stackResidualBlock(stackDepth, 128, 2))   --4
-    model:add(stackResidualBlock(stackDepth, 128, 2))   --2
-    model:add(nn.View(128*4):setNumInputDims(3))
-    model:add(nn.Linear(128*4, 64))
-    model:add(ReLU(true))
-    model:add(nn.Linear(64, 10))
-    model:add(nn.LogSoftMax())
+    model:add(st)
+    model:add(classifier)
 
     -- 初始化参数
     local function ConvInit(name)
@@ -92,6 +130,7 @@ local function createModel()
 end
 
 model = createModel()
+
 
 
 

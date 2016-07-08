@@ -12,8 +12,10 @@ function load_global_parameters()
 	global_use_cuda = true
 	global_GPU_device = 1	-- which one GPU	
 
+	bPrintInnerError = false
+
 	-- 总的训练数据
-	global_train_count = 10
+	global_train_count = 100000000
 
 	-- 训练轮次控制
 	global_iters_each_epochs = 50

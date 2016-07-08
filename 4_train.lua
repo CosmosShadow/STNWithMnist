@@ -36,7 +36,9 @@ function train()
 
             total_error= total_error+error
             
-            print(error)
+            if bPrintInnerError then
+                print(error)
+            end
 
             confusion:batchAdd(outputs, targets)
 

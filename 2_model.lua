@@ -7,14 +7,12 @@ local function createModel()
     local Avg = nn.SpatialAveragePooling
     local ReLU = nn.ReLU
     local Max = nn.SpatialMaxPooling
-    local SBatchNorm = nn.SpatialBatchNormalization
 
     -- 层间直连
     local function shortcut(nInputPlane,  nOutputPlane,  stride)
         if nInputPlane ~= nOutputPlane then
             return nn.Sequential()
                 :add(Convolution(nInputPlane, nOutputPlane, 1, 1, stride, stride))
-                :add(SBatchNorm(nOutputPlane))
         else
             return nn.Identity()
         end
@@ -27,10 +25,8 @@ local function createModel()
 
         local s = nn.Sequential()
         s:add(Convolution(nInputPlane, nOutputPlane, 3, 3, stride, stride, 1, 1))
-        s:add(SBatchNorm(nOutputPlane))
         s:add(ReLU(true))
         s:add(Convolution(nOutputPlane, nOutputPlane, 3, 3, 1, 1, 1, 1))
-        s:add(SBatchNorm(nOutputPlane))
 
         return nn.Sequential()
             :add(nn.ConcatTable()

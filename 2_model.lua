@@ -85,14 +85,12 @@ local function createModel()
 
     -- classifier
     local classifier = nn.Sequential()
-    classifier:add(Convolution(1, 16, 3, 3, 1, 1, 1, 1))
+    classifier:add(nn.Reshape(1*32*32))
+    classifier:add(nn.Linear(32*32, 256))
     classifier:add(ReLU(true))
-    classifier:add(stackResidualBlock(stackDepth, 32, 2))    --16
-    classifier:add(stackResidualBlock(stackDepth, 32, 2))    --8
-    classifier:add(stackResidualBlock(stackDepth, 32, 2))   --4
-    classifier:add(stackResidualBlock(stackDepth, 32, 2))   --2
-    classifier:add(nn.View(32*4):setNumInputDims(3))
-    classifier:add(nn.Linear(32*4, 10))
+    classifier:add(nn.Linear(256, 64))
+    classifier:add(ReLU(true))
+    classifier:add(nn.Linear(64, 10))
     classifier:add(nn.LogSoftMax())
 
     local model = nn.Sequential()
@@ -122,6 +120,7 @@ local function createModel()
 end
 
 model = createModel()
+
 
 
 

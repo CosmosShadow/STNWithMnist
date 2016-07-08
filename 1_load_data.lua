@@ -45,7 +45,7 @@ function load_input_target_train()
     end
 
     -- 归一化处理
-    inputs = inputs:div(255):mul(0.5)
+    inputs = inputs:div(255.0):add(-0.5)
 
     return inputs, labels
 end

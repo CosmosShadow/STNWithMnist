@@ -24,8 +24,8 @@ function load_global_parameters()
 	-- 参数保存、加载
 	global_save_parameter_iter = 20
 	global_parameter_store_path = 'parameters'
-	global_trained_parameter_path = ''
-	-- global_trained_parameter_path = 'parameters/model_2016_07_01_15_38_11.t7'
+	-- global_trained_parameter_path = ''
+	global_trained_parameter_path = 'parameters/tmp.t7'
 end
 
 function load_method_sgd()

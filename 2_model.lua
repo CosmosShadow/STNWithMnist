@@ -75,7 +75,7 @@ local function createModel()
     local branch2 = nn.Sequential()
     branch2:add(loc_net)
     branch2:add(nn.AffineTransformMatrixGenerator(false, false, false))
-    branch2:add(nn.AffineGridGeneratorBHWD(64, 64))
+    branch2:add(nn.AffineGridGeneratorBHWD(32, 32))
     ct:add(branch1)
     ct:add(branch2)
     local st = nn.Sequential()
@@ -91,7 +91,6 @@ local function createModel()
     local classifier = nn.Sequential()
     classifier:add(Convolution(1, 16, 3, 3, 1, 1, 1, 1))
     classifier:add(ReLU(true))
-    classifier:add(stackResidualBlock(stackDepth, 16, 1))    --64
     classifier:add(stackResidualBlock(stackDepth, 32, 2))    --32
     classifier:add(stackResidualBlock(stackDepth, 64, 2))    --16
     classifier:add(stackResidualBlock(stackDepth, 128, 2))   --8

@@ -30,13 +30,13 @@ function train()
             local grad = criterion:backward(outputs, targets)
             model:backward(inputs, grad)
 
-            -- 
-            inputs = inputs:float()
-            max_value, predictions = torch.max(outputs:float(), 2)
-            for i=1,inputs:size(1) do
-                image.save('output/'..i..'_'..predictions[i][1] ..'.png', inputs[i])
-            end
-            os.exit()
+            -- -- 
+            -- inputs = inputs:float()
+            -- max_value, predictions = torch.max(outputs:float(), 2)
+            -- for i=1,inputs:size(1) do
+            --     image.save('output/'..i..'_'..predictions[i][1] ..'.png', inputs[i])
+            -- end
+            -- os.exit()
 
             -- normalize
             local batchSize = inputs:size(1)

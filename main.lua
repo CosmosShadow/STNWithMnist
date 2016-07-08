@@ -2,6 +2,7 @@
 print("==> Loading required libraries")
 require 'dp'
 require 'rnn'
+require 'stn'
 require 'torch'
 require 'xlua'
 require 'optim'

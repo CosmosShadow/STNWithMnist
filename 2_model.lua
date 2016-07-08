@@ -57,10 +57,9 @@ local function createModel()
     local loc_net = nn.Sequential()
     loc_net:add(Convolution(1, 16, 3, 3, 1, 1, 1, 1))
     loc_net:add(ReLU(true))
-    loc_net:add(stackResidualBlock(stackDepth, 16, 1))    --64
-    loc_net:add(stackResidualBlock(stackDepth, 32, 2))    --32
-    loc_net:add(stackResidualBlock(stackDepth, 64, 2))    --16
-    loc_net:add(stackResidualBlock(stackDepth, 128, 2))   --8
+    loc_net:add(stackResidualBlock(stackDepth, 16, 2))    --32
+    loc_net:add(stackResidualBlock(stackDepth, 32, 2))    --16
+    loc_net:add(stackResidualBlock(stackDepth, 64, 2))    --8
     loc_net:add(stackResidualBlock(stackDepth, 128, 2))   --4
     loc_net:add(stackResidualBlock(stackDepth, 128, 2))   --2
     loc_net:add(nn.View(128*4):setNumInputDims(3))
@@ -91,9 +90,8 @@ local function createModel()
     local classifier = nn.Sequential()
     classifier:add(Convolution(1, 16, 3, 3, 1, 1, 1, 1))
     classifier:add(ReLU(true))
-    classifier:add(stackResidualBlock(stackDepth, 32, 2))    --32
-    classifier:add(stackResidualBlock(stackDepth, 64, 2))    --16
-    classifier:add(stackResidualBlock(stackDepth, 128, 2))   --8
+    classifier:add(stackResidualBlock(stackDepth, 32, 2))    --16
+    classifier:add(stackResidualBlock(stackDepth, 64, 2))    --8
     classifier:add(stackResidualBlock(stackDepth, 128, 2))   --4
     classifier:add(stackResidualBlock(stackDepth, 128, 2))   --2
     classifier:add(nn.View(128*4):setNumInputDims(3))

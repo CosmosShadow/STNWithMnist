@@ -28,7 +28,7 @@ end
 
 function load_method_sgd()
 	optimState = {
-		learningRate = 1e-4,
+		learningRate = 0.1,
 		learningRateDecay = 0,
 		weightDecay = 1e-4,
 		momentum = 0.9,

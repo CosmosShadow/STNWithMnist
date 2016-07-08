@@ -74,6 +74,9 @@ output = model_st:forward(inputs)
 inputs = inputs:float()
 output = output:float()
 
+inputs = inputs:add(0.5)
+output = output:add(0.5)
+
 for i=1,inputs:size(1) do
     image.save('output/'..i..'.png', inputs[i])
     image.save('output/'..i..'_st.png', output[i])

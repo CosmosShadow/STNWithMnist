@@ -34,7 +34,7 @@ function train()
             inputs = inputs:float()
             max_value, predictions = torch.max(outputs:float(), 2)
             for i=1,inputs:size(1) do
-                image.save('output/'..i..'_'..predictions[i]..'.png', inputs[i])
+                image.save('output/'..i..'_'..predictions[i][1] ..'.png', inputs[i])
             end
             os.exit()
 

@@ -19,11 +19,6 @@ function load_global_parameters()
 	global_iters_each_epochs = 50
 	global_batch_size = 64
 
-	-- 逐步学习长度
-	step_learning_length = 8
-
-	bPrintPredict = false
-
 	-- 参数保存、加载
 	global_save_parameter_iter = 20
 	global_parameter_store_path = 'parameters'
@@ -40,7 +35,7 @@ function load_method_sgd()
 		nesterov = true,
 		dampening = 0,
 	}
-	optimMethod = optim.custom_sgd
+	optimMethod = optim.sgd
 end
 
 function load_method_rprop()

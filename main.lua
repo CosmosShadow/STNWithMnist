@@ -8,10 +8,6 @@ require 'optim'
 require 'image'
 
 require 'Utils'
-require 'CosmosModels'
-
-dofile 'CriterionIntervalWithTerminal.lua'
-
 dofile 'method.lua'
 dofile '0_utils.lua'
 dofile '0_config.lua'
@@ -35,7 +31,6 @@ dofile '1_load_data.lua'
 
 dofile '3_loss.lua'
 dofile '4_train.lua'
-dofile '5_test.lua'
 
 -- 加载模型
 if global_trained_parameter_path and #(global_trained_parameter_path)>0 then
@@ -57,6 +52,7 @@ else
     criterion:float()
 end
 
+confusion = optim.ConfusionMatrix(classes)
 
 print("==> Training")
 epoch = 0

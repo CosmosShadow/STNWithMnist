@@ -3,13 +3,17 @@
 local function createModel()
     local nPreviousOutputPlane
 
+    local Convolution = nn.SpatialConvolution
+    local Avg = nn.SpatialAveragePooling
+    local ReLU = nn.ReLU
+    local Max = nn.SpatialMaxPooling
     local SBatchNorm = nn.SpatialBatchNormalization
 
     -- 层间直连
     local function shortcut(nInputPlane,  nOutputPlane,  stride)
-        if nInputPlane ~= nOutputPlane or stride ~= 1 then
+        if nInputPlane ~= nOutputPlane then
             return nn.Sequential()
-                :add(nn.SpatialConvolution(nInputPlane, nOutputPlane, stride, stride, stride, stride))
+                :add(Convolution(nInputPlane, nOutputPlane, 1, 1, stride, stride))
                 :add(SBatchNorm(nOutputPlane))
         else
             return nn.Identity()
@@ -22,22 +26,18 @@ local function createModel()
         nPreviousOutputPlane = nOutputPlane
 
         local s = nn.Sequential()
-        if nInputPlane ~= nOutputPlane or stride ~= 1 then
-            s:add(nn.SpatialConvolution(nInputPlane, nOutputPlane, stride, stride, stride, stride))
-        else
-            s:add(nn.SpatialConvolution(nInputPlane, nOutputPlane, 3, 3, 1, 1, 1, 1))
-        end
+        s:add(Convolution(nInputPlane, nOutputPlane, 3, 3, stride, stride, 1, 1))
         s:add(SBatchNorm(nOutputPlane))
-        s:add(nn.LeakyReLU(0.1, true))
-        s:add(nn.SpatialConvolution(nOutputPlane, nOutputPlane, 3, 3, 1, 1, 1, 1))
+        s:add(ReLU(true))
+        s:add(Convolution(nOutputPlane, nOutputPlane, 3, 3, 1, 1, 1, 1))
         s:add(SBatchNorm(nOutputPlane))
 
         return nn.Sequential()
             :add(nn.ConcatTable()
                 :add(s)
                 :add(shortcut(nInputPlane, nOutputPlane, stride)))
-            :add(nn.CAddTable())
-            :add(nn.LeakyReLU(0.1, true))
+            :add(nn.CAddTable(true))
+            :add(ReLU(true))
     end
 
     -- 堆叠残差模块
@@ -49,38 +49,23 @@ local function createModel()
         return seq
     end
 
-    --基础层:卷积 + 线性层
-    -- 卷积
-    local model_base = nn.Sequential()
-    model_base:add(nn.SpatialConvolution(3, 16, 3, 3, 1, 1, 1, 1))	--64*160
-    model_base:add(nn.LeakyReLU(0.1, true))
-    local stackDepth = 2
+    -- parameters
+    stackDepth = 2
     nPreviousOutputPlane = 16
-    model_base:add(stackResidualBlock(stackDepth, 32, 2))		--32*80
-    model_base:add(stackResidualBlock(stackDepth, 64, 2))		--16*40
-    model_base:add(stackResidualBlock(stackDepth, 128, 2))		--8*20
-    model_base:add(stackResidualBlock(stackDepth, 256, 2))		--4*10
-    model_base:add(stackResidualBlock(stackDepth, 512, 2))		--2*5
-    -- 线性层
-    model_base:add(nn.Reshape(512*2*5))
-    model_base:add(nn.Linear(512*2*5, 1024))
-    model_base:add(nn.LeakyReLU(0.1, true))
-    -- 分类层: LSTM + 分类
-    model_classifier = nn.Sequential()
-    model_classifier:add(nn.LSTM(1024, 512))
-    model_classifier:add(nn.LSTM(512, 512))
-    model_classifier:add(nn.LSTM(512, 256))
-    model_base:add(nn.LeakyReLU(0.1, true))
-    model_classifier:add(nn.Linear(256, 64))
-    model_base:add(nn.LeakyReLU(0.1, true))
-    model_classifier:add(nn.Linear(64, noutputs))
-    model_classifier:add(nn.LogSoftMax())
-    -- 分类层重复
-    local model_classifier_repeater = nn.Repeater(model_classifier, target_length)
 
+    -- model
     local model = nn.Sequential()
-    model:add(model_base)
-    model:add(model_classifier_repeater)
+    model:add(Convolution(1, 16, 3, 3, 1, 1, 1, 1))
+    model:add(SBatchNorm(16))
+    model:add(ReLU(true))
+    model:add(stackResidualBlock(stackDepth, 16, 1))    --64
+    model:add(stackResidualBlock(stackDepth, 32, 2))    --32
+    model:add(stackResidualBlock(stackDepth, 64, 2))    --16
+    model:add(stackResidualBlock(stackDepth, 128, 2))   --8
+    model:add(Avg(8, 8, 1, 1))
+    model:add(nn.View(128):setNumInputDims(3))
+    model:add(nn.Linear(128, 10))
+    model:add(nn.LogSoftMax())
 
     -- 初始化参数
     local function ConvInit(name)
@@ -105,6 +90,7 @@ local function createModel()
 end
 
 model = createModel()
+
 
 
 

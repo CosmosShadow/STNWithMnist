@@ -11,7 +11,7 @@ local data_trian = torch.load(data_train_path, 'ascii')
 local data_test = torch.load(data_test_path, 'ascii')
 
 function distort_image(img)
-	local ns = 4
+    local ns = 4
     -- 旋转
     local rot_angle = math.random()*math.pi/6 - math.pi/12
     img = image.rotate(img, rot_angle)
@@ -49,6 +49,7 @@ function load_input_target_train()
 
     return inputs, labels
 end
+
 
 
 

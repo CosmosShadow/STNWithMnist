@@ -13,7 +13,7 @@ function load_global_parameters()
 	global_GPU_device = 1	-- which one GPU	
 
 	-- 总的训练数据
-	global_train_count = 10000000
+	global_train_count = 10
 
 	-- 训练轮次控制
 	global_iters_each_epochs = 50

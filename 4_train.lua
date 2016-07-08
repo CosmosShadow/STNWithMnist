@@ -12,8 +12,6 @@ function train()
     for t = 1, global_iters_each_epochs do
         local inputs, targets = load_input_target_train()
 
-        image.save('1.png', inputs[1])
-
         if global_use_cuda then
             inputs = inputs:cuda()
             targets = targets:cuda()
@@ -37,6 +35,8 @@ function train()
             gradParameters:div(batchSize)
 
             total_error= total_error+error
+            
+            print(error)
 
             confusion:batchAdd(outputs, targets)
 

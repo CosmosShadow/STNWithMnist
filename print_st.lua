@@ -57,7 +57,7 @@ end
 
 confusion = optim.ConfusionMatrix(classes)
 
-model_st = model:get(2)
+model_st = model:get(1)
 
 local inputs, targets = load_input_target_train()
 

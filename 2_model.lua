@@ -14,7 +14,6 @@ local function createModel()
         if nInputPlane ~= nOutputPlane or stride ~= 1 then
             return nn.Sequential()
                 :add(Convolution(nInputPlane, nOutputPlane, 1, 1, stride, stride))
-                :add(SBatchNorm(nOutputPlane))
         else
             return nn.Identity()
         end
@@ -27,10 +26,8 @@ local function createModel()
 
         local s = nn.Sequential()
         s:add(Convolution(nInputPlane, nOutputPlane, 3, 3, stride, stride, 1, 1))
-        s:add(SBatchNorm(nOutputPlane))
         s:add(ReLU(true))
         s:add(Convolution(nOutputPlane, nOutputPlane, 3, 3, 1, 1, 1, 1))
-        s:add(SBatchNorm(nOutputPlane))
 
         return nn.Sequential()
             :add(nn.ConcatTable()
@@ -60,12 +57,12 @@ local function createModel()
     loc_net:add(stackResidualBlock(stackDepth, 16, 2))    --32
     loc_net:add(stackResidualBlock(stackDepth, 32, 2))    --16
     loc_net:add(stackResidualBlock(stackDepth, 64, 2))    --8
-    loc_net:add(stackResidualBlock(stackDepth, 128, 2))   --4
-    loc_net:add(stackResidualBlock(stackDepth, 128, 2))   --2
-    loc_net:add(nn.View(128*4):setNumInputDims(3))
-    loc_net:add(nn.Linear(128*4, 64))
+    loc_net:add(stackResidualBlock(stackDepth, 64, 2))   --4
+    loc_net:add(stackResidualBlock(stackDepth, 64, 2))   --2
+    loc_net:add(nn.View(64*4):setNumInputDims(3))
+    loc_net:add(nn.Linear(64*4, 32))
     loc_net:add(ReLU(true))
-    loc_net:add(nn.Linear(64, 6))
+    loc_net:add(nn.Linear(32, 6))
 
     -- 空间变换网络
     local ct = nn.ConcatTable()
@@ -86,18 +83,16 @@ local function createModel()
     stackDepth = 1
     nPreviousOutputPlane = 16
 
-    -- model
+    -- classifier
     local classifier = nn.Sequential()
     classifier:add(Convolution(1, 16, 3, 3, 1, 1, 1, 1))
     classifier:add(ReLU(true))
     classifier:add(stackResidualBlock(stackDepth, 32, 2))    --16
-    classifier:add(stackResidualBlock(stackDepth, 64, 2))    --8
-    classifier:add(stackResidualBlock(stackDepth, 128, 2))   --4
-    classifier:add(stackResidualBlock(stackDepth, 128, 2))   --2
-    classifier:add(nn.View(128*4):setNumInputDims(3))
-    classifier:add(nn.Linear(128*4, 64))
-    classifier:add(ReLU(true))
-    classifier:add(nn.Linear(64, 10))
+    classifier:add(stackResidualBlock(stackDepth, 32, 2))    --8
+    classifier:add(stackResidualBlock(stackDepth, 32, 2))   --4
+    classifier:add(stackResidualBlock(stackDepth, 32, 2))   --2
+    classifier:add(nn.View(32*4):setNumInputDims(3))
+    classifier:add(nn.Linear(32*4, 10))
     classifier:add(nn.LogSoftMax())
 
     local model = nn.Sequential()

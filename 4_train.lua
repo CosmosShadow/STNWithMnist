@@ -11,6 +11,11 @@ function train()
 
     for t = 1, global_iters_each_epochs do
         local inputs, targets = load_input_target_train()
+
+        image.save('1.png', inputs[1])
+        print(targets[1])
+        os.exit()
+
         if global_use_cuda then
             inputs = inputs:cuda()
             targets = targets:cuda()
